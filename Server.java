@@ -126,7 +126,7 @@ public class Server
             in.read(imgChunk, 1, chunkSize - 1);
             
             A5.print("", String.format("SERVER sent %s file chunk #%d [%d bytes starting with %d]",
-                        chunkSize - 1 < A5.MAX_DATA_SIZE -1 ? "last" : "", i, 
+                        in.available() == 0 ? "last" : "", i, 
                         chunkSize - 1, imgChunk[1]));
             i++;
             rdt.sendData(imgChunk);

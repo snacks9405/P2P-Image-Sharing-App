@@ -66,6 +66,7 @@ public class Client
                 byte[] in = rdt.receiveData();
                 if ((int)in[0] == A5.MSG_FILE_DONE) {
                     in = out.toByteArray();
+                    System.out.println(in.length);
                     displayImage(in);
                     Thread.sleep(2000);
                     frame.dispose();
