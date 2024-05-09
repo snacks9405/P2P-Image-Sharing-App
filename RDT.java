@@ -110,12 +110,12 @@ public class RDT
      */
     private byte checkSum(byte[] array, int n) 
     {
-        int checkSum = 0;
-        for (int i = 0; i < n; i++) {
+        byte checkSum = array[0];
+        for (int i = 1; i < n; i++) {
             checkSum ^= array[i];
         }
         
-        return (byte) checkSum; // only here to satisfy the compiler
+        return checkSum; // only here to satisfy the compiler
     }// checkSum
 
     /***********************************************************************
@@ -148,9 +148,12 @@ public class RDT
             try {
                 rcvSocket = new MyDatagramSocket(rcvPortNum);
                 while(true){
+                    rcvData = new byte[A5.MAX_MSG_SIZE + 2];
                     rcvPacket = new DatagramPacket(rcvData, rcvData.length);
                     rcvSocket.receive(rcvPacket);
-                    rcvData = rcvPacket.getData();
+                    rcvData = new byte[rcvPacket.getLength()];
+                    System.arraycopy(rcvPacket.getData(), 0, rcvData, 0, rcvPacket.getLength());
+                    System.out.println("Checksum before: " + checkSum(rcvData, rcvData.length));
                     if (dataOK()) {
                         dataReceived = new byte[rcvData.length - 2];
                         System.arraycopy(rcvData, 1, dataReceived, 0, rcvData.length - 2);
@@ -162,6 +165,7 @@ public class RDT
                         Thread.yield();
                         expectedSeqNum = expectedSeqNum == 0 ? 1 : 0;
                     } else {
+                        System.out.println(rcvData.length);
                         A5.print(tag, "RECEIVER got bad data: resent previous ACK");
                         sendAck(expectedSeqNum == 0 ? 1 : 0);
                     }
@@ -198,8 +202,10 @@ public class RDT
          */
         private void sendAck(int number)
         {
-            byte[] ackArr = {(byte) number};
-            DatagramPacket ackDP = new DatagramPacket(ackArr, 1, rcvPacket.getAddress(), rcvPacket.getPort());
+            byte[] ackArr = new byte[4];
+            ackArr[0] = (byte) number;
+            ackArr[3] = checkSum(ackArr, 3);
+            DatagramPacket ackDP = new DatagramPacket(ackArr, 4, rcvPacket.getAddress(), rcvPacket.getPort());
             try {
                 rcvSocket.send(ackDP);
             } catch (Exception e) {
@@ -294,12 +300,14 @@ public class RDT
         private void sendPacket() throws Exception
         {
             //add header&checksum
-            byte[] message = new byte[dataToSend.length+2];
+            byte[] message = new byte[dataToSend.length + 2];
+            System.out.println(dataToSend.length);
             message[0] = (byte) curSeqNum;
             System.arraycopy(dataToSend, 0, message, 1, dataToSend.length);
             message[message.length-1] = checkSum(message, message.length);
             System.out.println("checksum before sending: " + checkSum(message, message.length));
             System.out.println("seq num before sending: " + curSeqNum);
+            System.out.println("size before sending: " + message.length);
             senderSocket.send(new DatagramPacket(message, message.length, peerIpAddress, peerRcvPortNum));
         }// sendPacket
     }// Sender

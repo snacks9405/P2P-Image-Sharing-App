@@ -89,25 +89,29 @@ public class A5
         //     i = i == 0 ? 1 : 0;
         // }
 
-        while (true) {
-            byte[] testArr = {(byte)i, 2, 3, 4};
-            testArr[3] = checkSum(testArr, 3);
+        // while (true) {
+        //     byte[] testArr = {(byte)i, 2, 3, 4};
+        //     testArr[3] = checkSum(testArr, 3);
 
-            System.out.println(checkSum(testArr, testArr.length));
-            try {
-                byte[] results = new byte[5]; 
-                MyDatagramSocket mds = new MyDatagramSocket(8889);
-                DatagramPacket message = new DatagramPacket(results, 5);
-                mds.receive(message);
-                System.out.println(results[0] + " " + results[1]);
-                mds.send(new DatagramPacket(testArr, testArr.length, message.getAddress(), message.getPort()));
-                mds.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-                break;
-            }
-            i = i == 0 ? 1 : 0;
-        }
+        //     System.out.println(checkSum(testArr, testArr.length));
+        //     try {
+        //         byte[] results = new byte[5]; 
+        //         MyDatagramSocket mds = new MyDatagramSocket(8889);
+        //         DatagramPacket message = new DatagramPacket(results, 5);
+        //         mds.receive(message);
+        //         System.out.println(results[0] + " " + results[1]);
+        //         mds.send(new DatagramPacket(testArr, testArr.length, message.getAddress(), message.getPort()));
+        //         mds.close();
+        //     } catch (Exception e) {
+        //         e.printStackTrace();
+        //         break;
+        //     }
+        //     i = i == 0 ? 1 : 0;
+        // }
+
+        byte[] arr = "ACK".getBytes();
+        System.out.println(arr.length);
+
 
 
 

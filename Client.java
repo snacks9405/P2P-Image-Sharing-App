@@ -60,16 +60,18 @@ public class Client
         A5.print("", "CLIENT sent file request");
         if (getFileName()) {
             out = new ByteArrayOutputStream();
-            byte[] in;
+            
+            //this is factored for ONLY the small file. it
             while (true){
-                in = rdt.receiveData();
-                if (in[0] == A5.MSG_FILE_DONE) {
-                    displayImage(out.toByteArray());
-                    Thread.sleep(200);
+                byte[] in = rdt.receiveData();
+                if ((int)in[0] == A5.MSG_FILE_DONE) {
+                    in = out.toByteArray();
+                    displayImage(in);
+                    Thread.sleep(2000);
                     frame.dispose();
                     System.exit(0);
                 } else {
-                    out.write(in);
+                    out.write(in, 1, in.length - 1);
                     Thread.yield();
                 }
             }
@@ -141,6 +143,7 @@ public class Client
             byte[] fileNameArr = new byte[message.length-1];
             System.arraycopy(message, 1, fileNameArr, 0, message.length-1);
             fileName = new String(fileNameArr).trim();
+            A5.print("", "CLIENT got filename: " + fileName);
             return true;
         } 
         return false;  // only to satisfy the compiler

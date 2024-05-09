@@ -39,12 +39,14 @@ public class Server
      */
     public void run() throws Exception
     {
-        A5.print("S", "SERVER started");
-        getRequest();
-        String fileName = getRandomImageFile();
-        sendFileName(fileName);
-        System.out.println(fileName);
-        sendFile(new FileInputStream(new File(A5.IMG_SUBFOLDER + fileName)));
+            A5.print("S", "SERVER started");
+            getRequest();
+            String fileName = getRandomImageFile();
+            sendFileName(fileName);
+            System.out.println(fileName);
+            sendFile(new FileInputStream(new File(A5.IMG_SUBFOLDER + fileName)));
+            Thread.sleep(2000);
+            System.exit(0);
         
     }// run
 
@@ -82,8 +84,10 @@ public class Server
         }
         catch (Exception e)
         {
-            A5.print("S","SERVER closing due to error in main: "
-                               + e);
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            //A5.print("S","SERVER closing due to error in main: "
+                               //+ e);
         }
     }// main
 
@@ -106,14 +110,31 @@ public class Server
     // input stream
     private void sendFile(FileInputStream in) throws Exception
     {
-        while (in.available() != 0){
-            byte[] imgChunk = new byte[A5.MAX_MSG_SIZE];
+        int i = 1;
+        while (in.available() > 0){
+            byte[] imgChunkTemp = new byte[A5.MAX_MSG_SIZE];
+            byte[] imgChunk;
+            int numRead = in.read(imgChunkTemp, 1, A5.MAX_DATA_SIZE);
+            if (numRead < A5.MAX_DATA_SIZE) {
+                imgChunk = new byte[numRead + 1];
+                System.arraycopy(imgChunkTemp, 1, imgChunk, 1, numRead);
+            } else {
+                imgChunk = imgChunkTemp;
+            }
+            int chunkSize = imgChunk.length;
             imgChunk[0] = A5.MSG_FILE_DATA;
-            in.read(imgChunk, 1, in.available() > 8192 ? 8192 : in.available());
+            in.read(imgChunk, 1, chunkSize - 1);
+            
+            A5.print("", String.format("SERVER sent %s file chunk #%d [%d bytes starting with %d]",
+                        chunkSize - 1 < A5.MAX_DATA_SIZE -1 ? "last" : "", i, 
+                        chunkSize - 1, imgChunk[1]));
+            i++;
             rdt.sendData(imgChunk);
             Thread.yield();
         }
         byte[] doneMessage = {A5.MSG_FILE_DONE};
+        System.out.println("done message length: " + doneMessage.length);
+        System.out.println("Donee message pos 0: " + doneMessage[0]);
         rdt.sendData(doneMessage);
     }// sendFile
 
