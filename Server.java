@@ -111,24 +111,20 @@ public class Server
     private void sendFile(FileInputStream in) throws Exception
     {
         int i = 1;
-        while (true){
+        while (in.available() != 0){
             byte[] imgChunkTemp = new byte[A5.MAX_MSG_SIZE];
-            
             int numRead = in.read(imgChunkTemp, 1, A5.MAX_DATA_SIZE);
             if (numRead == -1) {
                 break;
             }
-            byte[] imgChunk;
+            byte[] imgChunk = new byte[numRead + 1];
             if (numRead < A5.MAX_DATA_SIZE) {
-                imgChunk = new byte[numRead + 1];
                 System.arraycopy(imgChunkTemp, 1, imgChunk, 1, numRead);
             } else {
                 imgChunk = imgChunkTemp;
             }
             int chunkSize = imgChunk.length;
-            imgChunk[0] = A5.MSG_FILE_DATA;
-            in.read(imgChunk, 1, chunkSize - 1);
-            
+            imgChunk[0] = A5.MSG_FILE_DATA;            
             A5.print("", String.format("SERVER sent %s file chunk #%d [%d bytes starting with %d]",
                         in.available() == 0 ? "last" : "", i, 
                         chunkSize - 1, imgChunk[1]));
